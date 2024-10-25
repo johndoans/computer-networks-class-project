@@ -1,73 +1,79 @@
+<!-- John Doan - CSCI 4550 Project -->
 <html>
   <head>
-    <title>Weather Data Submission</title>
+    <title>Weather Data Portal</title>
     <style>
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 14pt;
-      padding: auto;
-    }
-    form {
-      border-radius: 5px;
-      background-color: #f2f2f2;
-      padding: 20px;
-    }
-    form label {
-      padding-bottom: 10px;
-    }
-    #successNotification {
-      background-color: green;
-      color: white;
-      font-weight: bold;
-    }
-    .tabBar {
-      overflow: hidden;
-      border: 1px solid #ccc;
-      background-color: #f1f1f1;
-    }
-    .tabButton {
-      background-color: inherit;
-      float: left;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      padding: 14px 16px;
-      transition: 0.3s;
-    }
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14pt;
+        padding: auto;
+      }
+      form {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        padding: 20px;
+      }
+      form label {
+        display: block;
+      }
+      #header {
+        padding: 20px;
+        background-color: beige;
+      }
+      #successNotification {
+        background-color: green;
+        color: white;
+        font-weight: bold;
+      }
 
-    .tabButton:hover {
-      background-color: #ddd;
-    }
+      /* Tab styles */
+      .tabBar {
+        overflow: hidden;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+      }
+      .tabButton {
+        background-color: inherit;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 14px 16px;
+        transition: 0.3s;
+      }
+      .tabButton:hover {
+        background-color: #ddd !important;
+      }
+      .tabContent {
+        display: none;
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-top: none;
+      }
 
-    .tabContent {
-      display: none;
-      padding: 6px 12px;
-      border: 1px solid #ccc;
-      border-top: none;
-    }
-
-    table {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-table td, th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-table tr:nth-child(even){background-color: #f2f2f2;}
-
-table th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: blue;
-  color: white;
-}
+      /* Table styles */
+      table {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table td, th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      table tr:nth-child(even){
+        background-color: #f2f2f2;
+      }
+      table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: cornflowerblue;
+        color: white;
+      }
     </style>
     <script>
+      // Make tabs actually work
       function openTab(event, whichOne) {
         if (whichOne == "submitData") {
           document.getElementById("viewData").style.display="none";
@@ -81,6 +87,8 @@ table th {
           document.getElementById("viewDataTabButton").style.backgroundColor = "#ccc";
         }
       }
+
+      // Submit timestamp instead of date time string mess
       function onSubmit(event) {
             event.preventDefault();
             const dateTimeInput = document.getElementById("dateTime").value;
@@ -91,19 +99,27 @@ table th {
                 event.target.submit();
             }
         }
+
       window.onload = function(e) {
+          // Get tabs ready
           document.getElementById("submitData").style.display="block";
           document.getElementById("submitDataTabButton").style.backgroundColor = "#ccc";
+
+          // Hide success notification
           setTimeout(function() {
-            document.getElementById("successNotification").style.display = "none";
+            if (document.getElementById("successNotification") != null) {
+              document.getElementById("successNotification").style.display = "none";
+            }
           }, 5000);
+
+          // Get data from server, load into table
           const xhttp = new XMLHttpRequest();
           xhttp.onload = function() {
             var data = this.responseText;
             var lines = data.split('\n');
             for (var i = 0; i < lines.length; i++) {
               if (lines[i] != "") {
-              var elements = lines[i].split(":");
+              var elements = lines[i].split(",");
               var table = document.getElementById('weatherDataTable');
               var newRow = table.insertRow();
               var newCell = newRow.insertCell(0);
@@ -122,6 +138,9 @@ table th {
     </script>
   </head>
   <body>
+    <div id="header">
+      <h3>John Doan - CSCI 4550 Project - Weather Data Portal</h3>
+    </div>
     <div class="tabBar">
       <button id="submitDataTabButton" class="tabButton" onclick="openTab(event, 'submitData')">Submit Data</button>
       <button id="viewDataTabButton" class="tabButton" onclick="openTab(event, 'viewData')">View Data</button>
