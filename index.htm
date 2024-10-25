@@ -1,8 +1,155 @@
 <html>
   <head>
     <title>Weather Data Submission</title>
+    <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14pt;
+      padding: auto;
+    }
+    form {
+      border-radius: 5px;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    form label {
+      padding-bottom: 10px;
+    }
+    #successNotification {
+      background-color: green;
+      color: white;
+      font-weight: bold;
+    }
+    .tabBar {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+    }
+    .tabButton {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+    }
+
+    .tabButton:hover {
+      background-color: #ddd;
+    }
+
+    .tabContent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+
+    table {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table td, th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+table tr:nth-child(even){background-color: #f2f2f2;}
+
+table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: blue;
+  color: white;
+}
+    </style>
+    <script>
+      function openTab(event, whichOne) {
+        if (whichOne == "submitData") {
+          document.getElementById("viewData").style.display="none";
+          document.getElementById("viewDataTabButton").style.backgroundColor = "inherit";
+          document.getElementById("submitData").style.display="block";
+          document.getElementById("submitDataTabButton").style.backgroundColor = "#ccc";
+        } else if (whichOne == "viewData") {
+          document.getElementById("submitData").style.display="none";
+          document.getElementById("submitDataTabButton").style.backgroundColor = "inherit";
+          document.getElementById("viewData").style.display="block";
+          document.getElementById("viewDataTabButton").style.backgroundColor = "#ccc";
+        }
+      }
+      function onSubmit(event) {
+            event.preventDefault();
+            const dateTimeInput = document.getElementById("dateTime").value;
+            if (dateTimeInput) {
+                const date = new Date(dateTimeInput);
+                const timestamp = Math.floor(date.getTime() / 1000);
+                document.getElementById("timestamp").value = timestamp;
+                event.target.submit();
+            }
+        }
+      window.onload = function(e) {
+          document.getElementById("submitData").style.display="block";
+          document.getElementById("submitDataTabButton").style.backgroundColor = "#ccc";
+          setTimeout(function() {
+            document.getElementById("successNotification").style.display = "none";
+          }, 5000);
+          const xhttp = new XMLHttpRequest();
+          xhttp.onload = function() {
+            var data = this.responseText;
+            var lines = data.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i] != "") {
+              var elements = lines[i].split(":");
+              var table = document.getElementById('weatherDataTable');
+              var newRow = table.insertRow();
+              var newCell = newRow.insertCell(0);
+              var newCell2 = newRow.insertCell(1);
+              var newCell3 = newRow.insertCell(2);
+              var date = new Date(elements[0] * 1000);
+              newCell.innerHTML = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+              newCell2.innerHTML = elements[1];
+              newCell3.innerHTML = elements[2];
+              }
+            }
+          }
+          xhttp.open("GET", "/data");
+          xhttp.send();
+      }
+    </script>
   </head>
   <body>
-    <h1>Test -- Let's go it is working!</h1>
+    <div class="tabBar">
+      <button id="submitDataTabButton" class="tabButton" onclick="openTab(event, 'submitData')">Submit Data</button>
+      <button id="viewDataTabButton" class="tabButton" onclick="openTab(event, 'viewData')">View Data</button>
+    </div>
+    <div id="submitData" onsubmit="onSubmit(event)" class="tabContent">
+    <h2>Enter weather data below:</h2>
+    <form method="post" action="/">
+      <label for="time">Time and Date:<br>
+      <input type="datetime-local" id="dateTime" name="dateTime">
+      <input type="hidden" id="timestamp" name="timestamp">
+      </label><br>
+      <label for="zipCode">Zip Code:<br>
+      <input type="number" id="zipCode" name="zipCode" value=""></label><br>
+      <label for="temperature">Temperature:<br>
+      <input type="number" id="temperature" name="temperature" value=""></label><br>
+      <input type="submit" value="Submit">
+    </form>
+    </div>
+    <div id="viewData" class="tabContent">
+      <h2>Past Weather Data</h2>
+      <table id="weatherDataTable">
+        <tr>
+          <th>Date and Time</th>
+          <th>Zip Code</th>
+          <th>Temperature</th>
+        </tr>
+      </table>
+    </div>
+      
   </body>
 </html>
