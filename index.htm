@@ -20,7 +20,12 @@
         padding: 20px;
         background-color: beige;
       }
-      #successNotification {
+      .failedNotification {
+        background-color: red;
+        color: white;
+        font-weight: bold;
+      }
+      .successNotification {
         background-color: green;
         color: white;
         font-weight: bold;
@@ -105,12 +110,19 @@
           document.getElementById("submitData").style.display="block";
           document.getElementById("submitDataTabButton").style.backgroundColor = "#ccc";
 
-          // Hide success notification
-          setTimeout(function() {
-            if (document.getElementById("successNotification") != null) {
-              document.getElementById("successNotification").style.display = "none";
+          // Show success/fail message if appliable
+          const urlParams = new URLSearchParams(window.location.search);
+          const saveResult = urlParams.get("submissionStatus");
+          if (saveResult != null) {
+            if (saveResult == "success") {
+              document.body.insertAdjacentHTML("afterbegin", "<div class='successNotification' id='notification'>Data submitted successfully!</div><br>");
+            } else if (saveResult == "failed") {
+              document.body.insertAdjacentHTML("afterbegin", "<div class='failedNotification' id='notification'>Data unable to be submitted!</div><br>");
             }
-          }, 5000);
+            setTimeout(function() {
+              document.getElementById("notification").style.display = "none";
+            }, 5000);
+          }
 
           // Get data from server, load into table
           const xhttp = new XMLHttpRequest();
