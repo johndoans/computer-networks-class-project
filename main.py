@@ -1,6 +1,9 @@
 # John Doan - CSCI 4550 Project
+import mimetypes
 import socket
 import threading
+import os
+
 # Made from SCRATCH
 # No web frameworks (e.g. Django/Node.js) or use Python web modules
 # like HTTPServer for this project
@@ -17,7 +20,7 @@ def readFormData(formData):
             name, value = pair.split('=', 1)
             dictionary[name] = value
     return dictionary
-
+    
 # Handle each client
 def handleClient(clientConnection):
     # Make sure we get all packets
@@ -32,40 +35,51 @@ def handleClient(clientConnection):
     request = request.decode("utf-8")
     print(request)
     response = handleRequest(request)
+    if (isinstance(response, str)):
+        response = response.encode()
 
     # Close socket
-    clientConnection.sendall(response.encode())
+    clientConnection.sendall(response)
     clientConnection.close()
 
 # Handle the HTTP request
 def handleRequest(request):
   requestMethod = request.split(' ')[0]
-  filename = request.split('\n')[0].split()[1]
+  path = request.split('\n')[0].split()[1]
 
   # Return file to user
   if requestMethod == "GET":
-    if filename == '/data':
+    if path == "/data":
         # Return data file
         with fileLock:
             try:
-                file = open('data.csv')
+                file = open("data.csv", "r", encoding="utf-8")
                 content = file.read()
                 file.close()
                 response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\n\n" + content
             except FileNotFoundError:
-                response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'
+                response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+    elif path.startswith("/static/"):
+        path = path.lstrip("/")
+        if os.path.exists(path) and not os.path.isdir(path): # don't serve directories
+            contentType = mimetypes.guess_type(path)[0] or 'text/html'
+            with open(path, 'rb') as f:
+                content = f.read()
+            response = b"HTTP/1.1 200 OK\r\nContent-Type: " + str.encode(contentType) + b"; charset=UTF-8\r\n\n" + content
+        else:
+            response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
     else:
         # Return homepage
         try:
-            file = open('index.htm')
+            file = open("index.htm", "r", encoding="utf-8")
             content = file.read()
             file.close()
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\n" + content
         except FileNotFoundError:
-            response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'
+            response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
 
   # Handle user submitted data
-  elif requestMethod == "POST" and filename == '/':
+  elif requestMethod == "POST" and path == '/':
     #Luckily, the header and body of the HTTP request are separated by \r\n\r\n
     body = request.split('\r\n\r\n')[1]
     result = readFormData(body)
@@ -73,10 +87,19 @@ def handleRequest(request):
     # Write data to file
     with fileLock:
         try:
-            with open("data.csv", "a") as dataFile:
+            with open("data.csv", "a", encoding="utf-8") as dataFile:
                 if bool(result):
                     try:
-                        dataFile.write("\n" + result.get("timestamp", "") + "," + result.get("zipCode", "") + "," + result.get("temperature", ""))
+                        # Write the data in a CSV line
+                        # No need to encode or escape special characters,
+                        # since HTML form data is already encoded by the browser
+                        dataFile.write("\n" + result.get("timestamp", "") + "," 
+                                       + result.get("zipCode", "") + ","
+                                       + result.get("temperature", "") + ","
+                                       + result.get("windDirection", "") + ","
+                                       + result.get("windSpeed", "") + ","
+                                       + result.get("currentCondition", "") + ","
+                                       + result.get("description", ""))
                     except (IOError, OSError):
                         response = (
                             "HTTP/1.1 303 See Other\r\n"
