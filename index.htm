@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Weather Data Portal</title>
+    <meta name="viewport" content="width=device-width">
     <style>
       body {
         font-family: Arial, Helvetica, sans-serif;
@@ -76,8 +77,15 @@
         background-color: cornflowerblue;
         color: white;
       }
+      .scrollable {
+        max-height:200px;
+        max-width:300px;
+        overflow-y: auto;
+        word-break: break-all;
+      }
     </style>
     <script>
+      var weatherData = [];
       // Make tabs actually work
       function openTab(event, whichOne) {
         if (whichOne == "submitData") {
@@ -86,10 +94,140 @@
           document.getElementById("submitData").style.display="block";
           document.getElementById("submitDataTabButton").style.backgroundColor = "#ccc";
         } else if (whichOne == "viewData") {
-          document.getElementById("submitData").style.display="none";
-          document.getElementById("submitDataTabButton").style.backgroundColor = "inherit";
           document.getElementById("viewData").style.display="block";
           document.getElementById("viewDataTabButton").style.backgroundColor = "#ccc";
+          document.getElementById("submitData").style.display="none";
+          document.getElementById("submitDataTabButton").style.backgroundColor = "inherit";
+        }
+      }
+      // Input data into table
+      function inputIntoTable(entry) {
+        var table = document.getElementById('weatherDataTable');
+        var newRow = table.insertRow();
+        var dateTimeCell = newRow.insertCell(0);
+        var zipCodeCell = newRow.insertCell(1);
+        var temperatureCell = newRow.insertCell(2);
+        var windCell = newRow.insertCell(3);
+        var currentConditionCell = newRow.insertCell(4);
+        var descriptionCell = newRow.insertCell(5);
+
+        if (entry["dateTime"] != null && entry["dateTime"] != "N/A") {
+          var date = new Date(entry["dateTime"] * 1000);
+          if (date instanceof Date && !isNaN(date.valueOf())) {
+            dateTimeCell.innerHTML = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+          } else {
+            dateTimeCell.innerHTML = "N/A";
+          }
+        } else {
+          dateTimeCell.innerHTML = "N/A";
+        }
+
+        if (entry["zipCode"] != null && entry["zipCode"] != "N/A" && isFinite(parseFloat(entry["zipCode"]))) {
+          zipCodeCell.innerHTML = entry["zipCode"] + "<br><a href='http://google.com/maps?q=" + entry["zipCode"] + "' target='_blank'>(map)</a>";
+        } else {
+          zipCodeCell.innerHTML = "N/A";
+        }
+
+        if (entry["temperature"] != null && entry["temperature"] != "N/A" && isFinite(parseFloat(entry["temperature"]))) {
+          temperatureCell.innerHTML = entry["temperature"] + "&deg;F";
+          temperatureCell.style.backgroundColor = colorFromTemperature(entry["temperature"]);
+        } else {
+          temperatureCell.innerHTML = "N/A"
+        }
+
+        if (entry["windDirection"] != null && entry["windDirection"] == "N") {
+          windCell.innerHTML = "&darr; N &nbsp;";
+        } else if (entry["windDirection"] != null && entry["windDirection"] == "S") {
+          windCell.innerHTML = "&uarr; S &nbsp;";
+        } else if (entry["windDirection"] != null && entry["windDirection"] == "E") {
+          windCell.innerHTML = "&larr; E &nbsp;";
+        } else if (entry["windDirection"] != null && entry["windDirection"] == "W") {
+          windCell.innerHTML = "&rarr; W &nbsp;";
+        }
+
+        if (entry["windSpeed"] != null && entry["windSpeed"] != "N/A" && isFinite(parseFloat(entry["windSpeed"]))) {
+          windCell.insertAdjacentHTML("beforeend", entry["windSpeed"] + " MPH");
+        } else {
+          windCell.insertAdjacentHTML("beforeend", "N/A");
+        }
+        if (entry["currentCondition"] != null && entry["currentCondition"] != "N/A") {
+          var currentConditionImage = document.createElement("img");
+          currentConditionImage.style.width="50px";
+          currentConditionImage.style.height="50px";
+          currentConditionImage.src = "static/" + entry["currentCondition"] + ".png";
+          currentConditionCell.appendChild(currentConditionImage);
+          currentConditionCell.insertAdjacentHTML("beforeend", " " + nameFromConditionCode(entry["currentCondition"]));
+        } else {
+          currentConditionCell.innerHTML = "N/A";
+        }
+        
+        var descriptionDIV = document.createElement("div");
+        descriptionDIV.classList.add("scrollable");
+        descriptionDIV.innerText = entry["description"] ?? "N/A";
+        descriptionCell.appendChild(descriptionDIV);
+      }
+
+      // Get color associated with temperature
+      function colorFromTemperature(temperature) {
+        if (temperature < 0) {
+          return "purple";
+        } else if (temperature < 10) {
+          return "darkviolet";
+        } else if (temperature < 20) {
+          return "violet";
+        } else if (temperature < 30) {
+          return "blue";
+        } else if (temperature < 40) {
+          return "deepskyblue";
+        } else if (temperature < 50) { 
+          return "lightgreen";
+        } else if (temperature < 60) {
+          return "greenyellow";
+        } else if (temperature < 70) {
+          return "green";
+        } else if (temperature < 80) {
+          return "yellow";
+        } else if (temperature < 90) {
+          return "orange";
+        } else if (temperature < 100) {
+          return "orangered";
+        } else if (temperature >= 100) {
+          return "darkred";
+        } else {
+          return "gray";
+        }
+      }
+
+      // Get name from current weather condition code
+      function nameFromConditionCode(code) {
+        if (code == "clear") {
+          return "Clear";
+        } else if (code == "partlyCloudy") {
+          return "Partly Cloudy";
+        } else if (code == "scatteredRain") {
+          return "Scattered Rain Showers";
+        } else if (code == "rain") {
+          return "Rain";
+        } else if (code == "scatteredTstorm") {
+          return "Scattered T-Storm";
+        } else if (code == "tstorm") { 
+          return "T-Storm";
+        } else if (code == "scatteredSnow") {
+          return "Scattered Snow Showers";
+        } else if (code == "snow") {
+          return "Snow";
+        } else if (code == "scatteredMix") {
+          return "Scattered Mix/Sleet/Freezing Rain";
+        } else if (code == "mix") {
+          return "Mix/Sleet/Freezing Rain";
+        } else if (code == "fog") {
+          return "Fog";
+        } else if (code == "windy") {
+          return "Windy";
+        } else if (code == "haze") {
+          return "Haze";
+        } else {
+          return "N/A";
         }
       }
 
@@ -101,14 +239,17 @@
                 const date = new Date(dateTimeInput);
                 const timestamp = Math.floor(date.getTime() / 1000);
                 document.getElementById("timestamp").value = timestamp;
-                event.target.submit();
             }
+            event.target.submit();
         }
 
       window.onload = function(e) {
           // Get tabs ready
-          document.getElementById("submitData").style.display="block";
-          document.getElementById("submitDataTabButton").style.backgroundColor = "#ccc";
+          document.getElementById("viewData").style.display="block";
+          document.getElementById("viewDataTabButton").style.backgroundColor = "#ccc";
+
+          // Auto fill datetime picker for user's convenience
+          document.getElementById("dateTime").value = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
 
           // Show success/fail message if appliable
           const urlParams = new URLSearchParams(window.location.search);
@@ -128,19 +269,21 @@
           const xhttp = new XMLHttpRequest();
           xhttp.onload = function() {
             var data = this.responseText;
-            var lines = data.split('\n');
-            for (var i = 0; i < lines.length; i++) {
-              if (lines[i] != "") {
-              var elements = lines[i].split(",");
-              var table = document.getElementById('weatherDataTable');
-              var newRow = table.insertRow();
-              var newCell = newRow.insertCell(0);
-              var newCell2 = newRow.insertCell(1);
-              var newCell3 = newRow.insertCell(2);
-              var date = new Date(elements[0] * 1000);
-              newCell.innerHTML = date.toLocaleDateString() + " " + date.toLocaleTimeString();
-              newCell2.innerHTML = elements[1];
-              newCell3.innerHTML = elements[2];
+            var responseLines = data.split('\n');
+            for (var i = 0; i < responseLines.length; i++) {
+              if (responseLines[i] != "") {
+                var rawElements = responseLines[i].split(",");
+                var weatherDataEntry = {
+                  dateTime: decodeURIComponent((rawElements[0] ?? "N/A").replace(/\+/g, ' ')),
+                  zipCode: decodeURIComponent((rawElements[1] ?? "N/A").replace(/\+/g, ' ')),
+                  temperature: decodeURIComponent((rawElements[2] ?? "N/A").replace(/\+/g, ' ')),
+                  windDirection: decodeURIComponent((rawElements[3] ?? "N/A").replace(/\+/g, ' ')),
+                  windSpeed: decodeURIComponent((rawElements[4] ?? "N/A").replace(/\+/g, ' ')),
+                  currentCondition: decodeURIComponent((rawElements[5] ?? "N/A").replace(/\+/g, ' ')),
+                  description: decodeURIComponent((rawElements[6] ?? "N/A").replace(/\+/g, ' ')),
+                }
+                weatherData.push(weatherDataEntry);
+                inputIntoTable(weatherDataEntry);
               }
             }
           }
@@ -154,8 +297,25 @@
       <h3>John Doan - CSCI 4550 Project - Weather Data Portal</h3>
     </div>
     <div class="tabBar">
-      <button id="submitDataTabButton" class="tabButton" onclick="openTab(event, 'submitData')">Submit Data</button>
       <button id="viewDataTabButton" class="tabButton" onclick="openTab(event, 'viewData')">View Data</button>
+      <button id="submitDataTabButton" class="tabButton" onclick="openTab(event, 'submitData')">Submit Data</button>
+    </div>
+    <div id="viewData" class="tabContent">
+      <h2>View Weather Data</h2>
+      <div style="padding: 20px; background-color: gainsboro;">
+        <h4>Search:</h4>
+        
+      </div><br>
+      <table id="weatherDataTable">
+        <tr>
+          <th>Date and Time</th>
+          <th>Zip Code</th>
+          <th>Temperature</th>
+          <th>Wind</th>
+          <th>Current Condition</th>
+          <th>Description</th>
+        </tr>
+      </table>
     </div>
     <div id="submitData" onsubmit="onSubmit(event)" class="tabContent">
     <h2>Enter weather data below:</h2>
@@ -168,18 +328,35 @@
       <input type="number" id="zipCode" name="zipCode" value=""></label><br>
       <label for="temperature">Temperature:<br>
       <input type="number" id="temperature" name="temperature" value=""></label><br>
+      <label for="windSpeed">Wind:<br>
+      <select id="windDirection" name="windDirection">
+        <option value="N">&darr; North</option>
+        <option value="S">&uarr; South</option>
+        <option value="E">&larr; East</option>
+        <option value="W">&rarr; West</option>
+      </select>
+      <input type="number" id="windSpeed" name="windSpeed" value=""></label><br><br>
+      <label for="currentCondition">Current Weather Condition:</label>
+      <select id="currentCondition" name="currentCondition">
+        <option value="clear">Clear</option>
+        <option value="partlyCloudy">Partly Cloudy</option>
+        <option value="cloudy">Cloudy</option>
+        <option value="scatteredRain">Scattered Rain Showers</option>
+        <option value="rain">Rain</option>
+        <option value="scatteredTstorm">Scattered T-Storm</option>
+        <option value="tstorm">T-storm</option>
+        <option value="scatteredSnow">Scattered Snow Showers</option>
+        <option value="snow">Snow</option>
+        <option value="scatteredMix">Scattered Mix/Sleet/Freezing Rain</option>
+        <option value="mix">Mix/Sleet/Freezing Rain</option>
+        <option value="fog">Fog</option>
+        <option value="windy">Windy</option>
+        <option value="haze">Hazy</option>
+      </select><br><br>
+      <label for="description">Description:</label>
+      <textarea id="description" name="description" rows="4" cols="50"></textarea><br><br>
       <input type="submit" value="Submit">
     </form>
-    </div>
-    <div id="viewData" class="tabContent">
-      <h2>Past Weather Data</h2>
-      <table id="weatherDataTable">
-        <tr>
-          <th>Date and Time</th>
-          <th>Zip Code</th>
-          <th>Temperature</th>
-        </tr>
-      </table>
     </div>
       
   </body>
