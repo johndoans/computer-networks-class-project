@@ -63,6 +63,16 @@ def handleRequest(request):
             except FileNotFoundError:
                 response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
 
+    # Return data.csv file to download
+    elif path == "/data.csv":
+        try:
+            file = open("data.csv", "r", encoding="utf-8")
+            content = file.read()
+            file.close()
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/csv; charset=UTF-8\r\n\n" + content
+        except FileNotFoundError:
+            response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+
     # Return assets from static folder (e.g. images)
     elif path.startswith("/static/"):
         path = path.lstrip("/")
