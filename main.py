@@ -5,7 +5,7 @@ import threading
 import os
 
 # Made from SCRATCH
-# No web frameworks (e.g. Django/Node.js) or use Python web modules
+# No web frameworks (e.g. Django/Node.js) or Python web modules
 # like HTTPServer for this project
 
 # Create a Lock to prevent threads from overwriting file
@@ -35,6 +35,8 @@ def handleClient(clientConnection):
     request = request.decode("utf-8")
     print(request)
     response = handleRequest(request)
+
+    # Encode data in bytes if HTTP response is in string format
     if (isinstance(response, str)):
         response = response.encode()
 
@@ -44,6 +46,7 @@ def handleClient(clientConnection):
 
 # Handle the HTTP request
 def handleRequest(request):
+  # Manually read the HTTP request
   requestMethod = request.split(' ')[0]
   path = request.split('\n')[0].split()[1]
 
@@ -59,6 +62,8 @@ def handleRequest(request):
                 response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\n\n" + content
             except FileNotFoundError:
                 response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+
+    # Return assets from static folder (e.g. images)
     elif path.startswith("/static/"):
         path = path.lstrip("/")
         if os.path.exists(path) and not os.path.isdir(path): # don't serve directories
@@ -68,8 +73,9 @@ def handleRequest(request):
             response = b"HTTP/1.1 200 OK\r\nContent-Type: " + str.encode(contentType) + b"; charset=UTF-8\r\n\n" + content
         else:
             response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+
+    # Otherwise, return homepage
     else:
-        # Return homepage
         try:
             file = open("index.htm", "r", encoding="utf-8")
             content = file.read()
@@ -98,8 +104,12 @@ def handleRequest(request):
                                        + result.get("temperature", "") + ","
                                        + result.get("windDirection", "") + ","
                                        + result.get("windSpeed", "") + ","
-                                       + result.get("currentCondition", "") + ","
+                                       + result.get("condition", "") + ","
                                        + result.get("description", ""))
+                        
+                        # Reload homepage and add query param so homepage knows to show success message
+                        response = ("HTTP/1.1 303 See Other\r\n"
+                                    "Location: /?submissionStatus=success\r\n\r\n")
                     except (IOError, OSError):
                         response = (
                             "HTTP/1.1 303 See Other\r\n"
@@ -108,10 +118,6 @@ def handleRequest(request):
             response = (
             "HTTP/1.1 303 See Other\r\n"
             "Location: /?submissionStatus=failed\r\n\r\n")
-            
-        response = (
-            "HTTP/1.1 303 See Other\r\n"
-            "Location: /?submissionStatus=success\r\n\r\n")
         
   return response
 
