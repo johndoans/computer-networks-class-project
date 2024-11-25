@@ -33,12 +33,14 @@ def handleClient(clientConnection):
 
     # Process the request
     request = request.decode("utf-8")
-    print(request)
-    response = handleRequest(request)
+    status, headers, body = handleRequest(request)
 
-    # Encode data in bytes if HTTP response is in string format
-    if (isinstance(response, str)):
-        response = response.encode()
+    # Prepare the HTTP response message
+    response = "HTTP/1.1 " + status + "\r\n" + headers + "\r\n\r\n"
+    response = response.encode("utf-8")
+    if (isinstance(body, str)):
+        body = body.encode("utf-8")
+    response = response + body
 
     # Close socket
     clientConnection.sendall(response)
@@ -59,9 +61,13 @@ def handleRequest(request):
                 file = open("data.csv", "r", encoding="utf-8")
                 content = file.read()
                 file.close()
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\n\n" + content
+                status = "200 OK"
+                headers = "Content-Type: text/csv; charset=UTF-8"
+                body = content
             except FileNotFoundError:
-                response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+                status = "404 NOT FOUND"
+                headers = "Content-Type: text/plain; charset=UTF-8"
+                body = "Unfortunately, the file couldn't be found. Please try again if you want."
 
     # Return data.csv file to download
     elif path == "/data.csv":
@@ -69,9 +75,13 @@ def handleRequest(request):
             file = open("data.csv", "r", encoding="utf-8")
             content = file.read()
             file.close()
-            response = "HTTP/1.1 200 OK\r\nContent-Type: text/csv; charset=UTF-8\r\n\n" + content
+            status = "200 OK"
+            headers = "Content-Type: text/csv; charset=UTF-8"
+            body = content
         except FileNotFoundError:
-            response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+            status = "404 NOT FOUND"
+            headers = "Content-Type: text/plain; charset=UTF-8"
+            body = "Unfortunately, the file couldn't be found. Please try again if you want."
 
     # Return assets from static folder (e.g. images)
     elif path.startswith("/static/"):
@@ -80,9 +90,13 @@ def handleRequest(request):
             contentType = mimetypes.guess_type(path)[0] or 'text/html'
             with open(path, 'rb') as f:
                 content = f.read()
-            response = b"HTTP/1.1 200 OK\r\nContent-Type: " + str.encode(contentType) + b"; charset=UTF-8\r\n\n" + content
+            status = "200 OK"
+            headers = "Content-Type: " + contentType + "; charset=UTF-8"
+            body = content
         else:
-            response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+            status = "404 NOT FOUND"
+            headers = "Content-Type: text/plain; charset=UTF-8"
+            body = "Unfortunately, the file couldn't be found. Please try again if you want."
 
     # Otherwise, return homepage
     else:
@@ -90,9 +104,13 @@ def handleRequest(request):
             file = open("index.htm", "r", encoding="utf-8")
             content = file.read()
             file.close()
-            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\n" + content
+            status = "200 OK"
+            headers = "Content-Type: text/html; charset=UTF-8"
+            body = content
         except FileNotFoundError:
-            response = "HTTP/1.0 404 NOT FOUND\n\nFile Not Found"
+            status = "404 NOT FOUND"
+            headers = "Content-Type: text/plain; charset=UTF-8"
+            body = "Unfortunately, the file couldn't be found. Please try again if you want."
 
   # Handle user submitted data
   elif requestMethod == "POST" and path == '/':
@@ -118,18 +136,19 @@ def handleRequest(request):
                                        + result.get("description", ""))
                         
                         # Reload homepage and add query param so homepage knows to show success message
-                        response = ("HTTP/1.1 303 See Other\r\n"
-                                    "Location: /?submissionStatus=success\r\n\r\n")
+                        status = "303 See Other"
+                        headers = "Location: /?submissionStatus=success"
+                        body = "Please wait..."
                     except (IOError, OSError):
-                        response = (
-                            "HTTP/1.1 303 See Other\r\n"
-                            "Location: /?submissionStatus=failed\r\n\r\n")
+                        status = "303 See Other"
+                        headers = "Location: /?submissionStatus=failed"
+                        body = "Please wait..."
         except (FileNotFoundError, PermissionError, OSError):
-            response = (
-            "HTTP/1.1 303 See Other\r\n"
-            "Location: /?submissionStatus=failed\r\n\r\n")
+            status = "303 See Other"
+            headers = "Location: /?submissionStatus=failed"
+            body = "Please wait..."
         
-  return response
+  return status, headers, body
 
 def startServer():
     # Define socket host and port
@@ -141,7 +160,7 @@ def startServer():
     serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serverSocket.bind((SERVER_HOST, SERVER_PORT))
     serverSocket.listen(1)
-    print('Listening on port %s ...' % SERVER_PORT)
+    print('Listening on port %s...' % SERVER_PORT)
 
     while True:
         # Client
