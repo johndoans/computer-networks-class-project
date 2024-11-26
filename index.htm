@@ -280,7 +280,8 @@
             // If user's search criteria is invalid or not in correct format, put "N/A"
             var dateValue = document.getElementById("search-date").value;
             if (dateValue && !isNaN(new Date(dateValue).getDate())) {
-              dateValue = new Date(dateValue);
+              // Add T00:00:00 (with no Z) so date is accurate in user's time zone
+              dateValue = new Date(dateValue + "T00:00:00");
             } else {
               dateValue = "N/A";
             }
@@ -330,10 +331,9 @@
                 if (weatherDataEntry["dateTime"] != "N/A" && dateValue != "N/A") {
                   var weatherDataEntryDate = new Date(weatherDataEntry["dateTime"] * 1000);
                   if (weatherDataEntryDate instanceof Date && !isNaN(weatherDataEntryDate.valueOf())) {
-                    // When comparing dates, use UTC functions so we don't have to worry about time zones
-                    if (weatherDataEntryDate.getUTCMonth() == dateValue.getUTCMonth() &&
-                        weatherDataEntryDate.getUTCDate() == dateValue.getUTCDate() &&
-                        weatherDataEntryDate.getUTCFullYear() == dateValue.getUTCFullYear()) {
+                    if (weatherDataEntryDate.getMonth() === dateValue.getMonth() &&
+                        weatherDataEntryDate.getDate() === dateValue.getDate() &&
+                        weatherDataEntryDate.getFullYear() === dateValue.getFullYear()) {
                       return true;
                     } else {
                       return false;
