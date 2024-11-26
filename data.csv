@@ -1,31 +1,26 @@
-1686344535,17284,-3,E,35,hazy
-1687487858,59082,78,S,13,clear
-1687653166,60132,-8,N,9,cloudy
-1688314691,86267,109,E,26,partlyCloudy
-1688505314,12270,41,N,4,mix
-1688661221,78005,13,W,1,windy
-1689944025,14872,81,E,40,hazy
-1690205426,41097,14,E,23,rain
-1690770970,23536,48,S,10,snow
-1690872056,26345,33,N,46,rain
-1691287610,96901,56,W,8,hazy
-1691378699,91686,-5,S,8,snow
-1691696589,23356,68,W,4,cloudy
-1692557886,42432,95,W,15,hazy
-1693149096,47895,81,W,29,partlyCloudy
-1693276380,66144,75,E,28,scatteredTstorm
-1694203641,94755,102,E,13,rain
-1695273109,10839,99,W,17,mix
-1695468098,76454,25,S,27,clear
-1695508443,56067,66,N,1,snow
-1695911733,95616,91,S,37,scatteredRain
-1697370293,37530,73,W,46,hazy
-1697629250,40130,-10,W,11,scatteredMix
-1697644407,46713,54,N,45,mix
-1697895982,69613,65,S,11,snow
-1732576920,31234,32,N,21,clear,Test
-1732580340,,,N,,clear,
-1732580400,64789,76,N,,fog,
-1732580460,0,,N,,clear,
-1732580460,,,E,,clear,
-1732581300,,,N,,clear,j
+1701604490,33101,38,E,31,fog,Foggy conditions.
+1702064379,33101,10,S,24,partlyCloudy,Partly cloudy skies.
+1702562586,90210,21,N,42,scatteredSnow,Scattered snow showers.
+1706654426,33101,82,N,43,rain,Rainy and wet.
+1706927159,30301,82,E,4,cloudy,Cloudy skies.
+1707274396,85001,68,S,37,scatteredSnow,Some scattered snow showers.
+1707448384,85001,103,N,36,windy,Windy conditions.
+1708808323,10001,13,E,5,hazy,Hazy and warm.
+1709363547,30301,21,N,7,rain,Rainy and wet.
+1710729580,33101,2,S,42,hazy,Hazy skies.
+1713375348,85001,97,E,8,rain,Showers throughout the day.
+1713842461,60601,8,E,48,clear,A bright and sunny day!
+1714815546,30301,94,N,29,windy,Strong winds blowing.
+1715310548,94102,32,S,24,partlyCloudy,A mix of clouds and sun.
+1715443292,94102,99,E,50,fog,Foggy and misty.
+1715445517,90210,16,N,19,scatteredSnow,Some on and off snow showers.
+1716089514,33101,75,W,22,snow,Snowy day.
+1716654278,33101,63,E,34,scatteredTstorm,Scattered thunderstorms throughout the day.
+1717557535,30301,102,N,32,hazy,Pretty hazy.
+1721566970,30301,-6,E,9,windy,Strong winds blowing.
+1722433795,73301,33,N,1,rain,Showers throughout the day.
+1722974145,30301,90,W,19,mix,A mix of different weather patterns.
+1723222197,10001,88,E,39,mix,Varied weather conditions.
+1725167985,60601,17,W,1,rain,Rainy and wet.
+1732336915,30301,22,E,47,partlyCloudy,Partly cloudy skies.
+1732582620,63110,42,S,12,cloudy,Cloudy+and+cooler.

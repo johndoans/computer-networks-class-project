@@ -207,7 +207,7 @@
         } else if (temperature < 60) {
           return "greenyellow";
         } else if (temperature < 70) {
-          return "green";
+          return "limegreen";
         } else if (temperature < 80) {
           return "yellow";
         } else if (temperature < 90) {
@@ -227,6 +227,8 @@
           return "Clear";
         } else if (code == "partlyCloudy") {
           return "Partly Cloudy";
+        } else if (code == "cloudy") {
+          return "Cloudy";
         } else if (code == "scatteredRain") {
           return "Scattered Rain Showers";
         } else if (code == "rain") {
